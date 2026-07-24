@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSubjects, getAllGradesBySubject } from '@/lib/grades';
 import {
@@ -46,7 +47,12 @@ export default async function DashboardPage({
           <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">Sophia&apos;s Grades</h1>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">Overall performance across all subjects</p>
         </div>
-        <LogoutButton />
+        <div className="flex items-center gap-4">
+          <Link href="/how-it-works" className="text-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-50">
+            How this works
+          </Link>
+          <LogoutButton />
+        </div>
       </div>
 
       <NavTabs current="dashboard" />
