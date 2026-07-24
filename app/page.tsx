@@ -1,19 +1,43 @@
+import { redirect } from 'next/navigation';
 import { getSubjects, getAllGradesBySubject } from '@/lib/grades';
-import { computeSubjectMetrics, computeAggregateMetrics } from '@/lib/metrics';
+import {
+  computeSubjectMetrics,
+  computeAggregateMetrics,
+  filterByDateRange,
+  parseDateRangeParams,
+  getDefaultDateRange,
+} from '@/lib/metrics';
 import { MetricBadge } from '@/components/MetricBadge';
 import { SubjectCard } from '@/components/SubjectCard';
 import { AddSubjectForm } from '@/components/AddSubjectForm';
 import { LogoutButton } from '@/components/LogoutButton';
+import { DateRangePicker } from '@/components/DateRangePicker';
+import { NavTabs } from '@/components/NavTabs';
+import { dateRangeQuery } from '@/lib/format';
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const rawParams = await searchParams;
+  if (!rawParams.start && !rawParams.end && !rawParams.range) {
+    const defaultRange = getDefaultDateRange();
+    redirect(`/?start=${defaultRange.start}&end=${defaultRange.end}`);
+  }
+
+  const { start, end } = parseDateRangeParams(rawParams);
   const [subjects, gradesBySubject] = await Promise.all([getSubjects(), getAllGradesBySubject()]);
 
-  const subjectSummaries = subjects.map((subject) => {
-    const grades = gradesBySubject.get(subject.id) ?? [];
-    return { subject, metrics: computeSubjectMetrics(grades) };
-  });
+  const filteredGradesBySubject = subjects.map((s) => filterByDateRange(gradesBySubject.get(s.id) ?? [], { start, end }));
 
-  const aggregate = computeAggregateMetrics(subjects.map((s) => gradesBySubject.get(s.id) ?? []));
+  const subjectSummaries = subjects.map((subject, i) => ({
+    subject,
+    metrics: computeSubjectMetrics(filteredGradesBySubject[i]),
+  }));
+
+  const aggregate = computeAggregateMetrics(filteredGradesBySubject);
+  const query = dateRangeQuery({ start, end });
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10">
@@ -23,6 +47,12 @@ export default async function DashboardPage() {
           <p className="text-sm text-zinc-500 dark:text-zinc-400">Overall performance across all subjects</p>
         </div>
         <LogoutButton />
+      </div>
+
+      <NavTabs current="dashboard" />
+
+      <div className="mt-6">
+        <DateRangePicker action="/" start={start} end={end} />
       </div>
 
       <div className="mt-6 flex gap-4">
@@ -36,7 +66,7 @@ export default async function DashboardPage() {
       ) : (
         <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
           {subjectSummaries.map(({ subject, metrics }) => (
-            <SubjectCard key={subject.id} subject={subject} metrics={metrics} />
+            <SubjectCard key={subject.id} subject={subject} metrics={metrics} query={query} />
           ))}
         </div>
       )}

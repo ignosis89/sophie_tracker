@@ -5,9 +5,9 @@ import { SESSION_COOKIE_NAME } from '@/lib/constants';
 
 export async function proxy(request: NextRequest) {
   const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
-  const isValid = await verifySessionToken(token);
+  const session = await verifySessionToken(token);
 
-  if (!isValid) {
+  if (!session) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 

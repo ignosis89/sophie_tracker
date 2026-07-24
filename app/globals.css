@@ -1,4 +1,23 @@
 @import "tailwindcss";
+@import "react-day-picker/style.css";
+
+.rdp-root {
+  --rdp-accent-color: #18181b; /* zinc-900 */
+  --rdp-accent-background-color: #f4f4f5; /* zinc-100 */
+  --rdp-range_start-color: #fafafa; /* zinc-50 */
+  --rdp-range_end-color: #fafafa;
+  --rdp-today-color: #18181b;
+}
+
+@media (prefers-color-scheme: dark) {
+  .rdp-root {
+    --rdp-accent-color: #fafafa; /* zinc-50 */
+    --rdp-accent-background-color: #27272a; /* zinc-800 */
+    --rdp-range_start-color: #18181b; /* zinc-900 */
+    --rdp-range_end-color: #18181b;
+    --rdp-today-color: #fafafa;
+  }
+}
 
 :root {
   --background: #ffffff;

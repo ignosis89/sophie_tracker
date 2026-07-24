@@ -23,7 +23,7 @@ export function GradeHistoryChart({ grades }: { grades: Grade[] }) {
 
   const points = sorted.map((grade, i) => ({
     x: n === 1 ? PADDING.left + PLOT_WIDTH / 2 : PADDING.left + (i / (n - 1)) * PLOT_WIDTH,
-    y: yFor(grade.score),
+    y: yFor(grade.percentage),
     grade,
   }));
 
@@ -104,10 +104,12 @@ export function GradeHistoryChart({ grades }: { grades: Grade[] }) {
             className="fill-[#2a78d6] stroke-white dark:fill-[#3987e5] dark:stroke-zinc-950"
             strokeWidth={2}
           >
-            <title>
-              {p.grade.recordedAt}: {p.grade.score}
+            {/* <desc>, not <title> - React hoists any <title> tag to <head> as document metadata,
+                even one nested inside an SVG, which breaks hydration and drops the tooltip. */}
+            <desc>
+              {p.grade.recordedAt}: {p.grade.pointsEarned}/{p.grade.pointsPossible} ({Math.round(p.grade.percentage)}%)
               {p.grade.label ? ` (${p.grade.label})` : ''}
-            </title>
+            </desc>
           </circle>
         ))}
 
@@ -118,7 +120,7 @@ export function GradeHistoryChart({ grades }: { grades: Grade[] }) {
             dominantBaseline="middle"
             className="fill-zinc-700 text-xs font-medium dark:fill-zinc-300"
           >
-            {last.grade.score}
+            {Math.round(last.grade.percentage)}%
           </text>
         )}
       </svg>
